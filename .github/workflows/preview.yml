@@ -1,0 +1,57 @@
+# Preview for review (ADR 0003): renders one page and deploys it to GitHub Pages as an artifact.
+# The HTML never enters git. Run with marker=false to upload the same page without the lane marker.
+name: preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      night:
+        description: Night to render (YYYY-MM-DD)
+        default: '2026-10-28'
+        required: true
+      marker:
+        description: Show the lane marker (repo secret LANE_MARKER)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: pnpm install
+      - name: Save the page as one HTML file
+        env:
+          NIGHT: ${{ inputs.night }}
+          LANE_MARKER: ${{ inputs.marker && secrets.LANE_MARKER || '' }}
+        run: |
+          [[ "$NIGHT" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "bad night"; exit 1; }
+          pnpm start > rig.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:8787/health > /dev/null && break; sleep 1; done
+          mkdir -p _site
+          curl -sf "http://localhost:8787/digest/$NIGHT" -o _site/index.html
+          kill %1
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 1
+      - id: deploy
+        uses: actions/deploy-pages@v4
