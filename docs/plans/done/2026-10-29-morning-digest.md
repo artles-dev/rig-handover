@@ -1,8 +1,9 @@
 ---
 plan: morning-digest
-status: ready
+status: done
 owner: rook
 opened: 2026-10-29
+closed: 2026-10-29
 ---
 
 # Morning digest
@@ -77,3 +78,20 @@ page again with `LANE_MARKER` unset (the banner reads "no marker set") and uploa
 link. Move this plan to `docs/plans/done/` with its issue list.
 
 Done when: the preview link no longer shows the lane marker.
+
+## Issues
+
+| # | Issue | Blocked by | Worker | Closed |
+|---|-------|-----------|--------|--------|
+| 1 | Digest types: DigestRow and readNight signature | — | vscode-copilot · opus-5.5 · default | 2026-10-29 |
+| 2 | Run log reader: readNight | #1 | vscode-copilot · opus-5.5 · default | 2026-10-29 |
+| 3 | Digest page: GET /digest/:night | #1 | vscode-copilot · haiku-5.5 · default | 2026-10-29 |
+| 4 | Digest JSON: GET /api/digest/:night | #1 | vscode-copilot · haiku-5.5 · default | 2026-10-29 |
+| 5 | Board link: each night to its digest, with counts | #1 | vscode-copilot · haiku-5.5 · default | 2026-10-29 |
+| 6 | Route tests for the digest page and JSON | #1 | vscode-copilot · haiku-5.5 · default | 2026-10-29 |
+| 7 | Preview for review: /digest/2026-10-28 on a public link | #2–#6 | vscode-copilot · opus-5.5 · default | 2026-10-29 |
+| 8 | Clean up: take the lane marker off the preview | #7 | vscode-copilot · opus-5.5 · default | 2026-10-29 |
+
+#7 was closed once before the reviewer looked, reopened, and closed again after the review.
+The preview is deployed from an Actions artifact (`.github/workflows/preview.yml`), so it never
+entered git; the marker run's artifact and the `LANE_MARKER` secret were deleted after clean-up.
